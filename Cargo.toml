@@ -1,0 +1,23 @@
+[package]
+name = "music-index"
+description = "A lightweight Rust library for smart music library indexing, fuzzy search, and playback management."
+keywords = ["music", "index", "search", "filter", "player"]
+categories = ["development-tools"]
+authors = ["Bulat Sh. <synapdrake@ya.ru>"]
+version = "0.1.0"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/fuderis/music-index-rs"
+edition = "2024"
+
+[dependencies]
+tokio = { version = "1.52.3", features = ["full"] }
+macron = { version = "0.2.1", features = ["derive", "path", "string"] }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = { version = "1.0.150" }
+lofty = { version = "0.24.0" }
+fuzzy-cmp = { version = "0.2.0", features = ["hybrid"] }
+clap = { version = "4.6.1", features = ["derive"], optional = true }
+
+[features]
+test-cli = ["dep:clap"]
