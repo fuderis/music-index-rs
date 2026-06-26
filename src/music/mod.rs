@@ -78,6 +78,7 @@ pub enum SearchIntent {
 }
 
 /// The music search manager
+#[derive(Debug, Clone)]
 pub struct MusicIndexer {
     pub cache: MusicCache,
 }
