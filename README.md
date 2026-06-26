@@ -34,16 +34,18 @@ use music_index::{MusicIndexer, SearchIntent};
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let music_index = MusicIndexer::scan_dir("~/Music", "~/music.cache").await?;
 
-    let result = music_index.search(SearchIntent::Targeted {
+    let target = music_index.search(SearchIntent::Targeted {
         band: Some("Nirvana"),
         album: Some("Unplugged"),
         track: None,
         genre: None
     });
 
-    for track in result.tracks() {
+    for track in target.tracks() {
         println!("🎵 {}", track.name);
     }
+
+    music_index.play(target, "playlist.m3u").await?;
 
     Ok(())
 }
@@ -54,7 +56,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 ### Global search:
 
 ```rust
-SearchIntent::Global { query: "metallica black album" }
+SearchIntent::Global { query: "metallica" }
 ```
 Cascade order: Bands → Albums → Tracks
 

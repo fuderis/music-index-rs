@@ -515,7 +515,7 @@ impl MusicIndexer {
     }
 
     /// Creates the M3U playlist file
-    async fn create_playlist<'a>(
+    pub async fn create_playlist<'a>(
         &self,
         target: PlaybackTarget<'a>,
         playlist: impl AsRef<Path>,
@@ -547,7 +547,7 @@ impl MusicIndexer {
     }
 
     /// Launches the playlist in program by default
-    async fn launch_player(&self, playlist_file: &Path) -> Result<()> {
+    pub async fn launch_player(&self, playlist_file: &Path) -> Result<()> {
         let playlist_str = playlist_file.to_string_lossy();
 
         #[cfg(unix)]
