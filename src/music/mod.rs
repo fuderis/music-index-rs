@@ -66,16 +66,14 @@ impl<'a> PlaybackTarget<'a> {
 }
 
 /// The music search intent
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, Eq, PartialEq)]
-pub enum SearchIntent<'a> {
-    Global {
-        query: &'a str,
-    },
+#[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
+pub enum SearchIntent {
+    Global(String),
     Targeted {
-        band: Option<&'a str>,
-        album: Option<&'a str>,
-        track: Option<&'a str>,
-        genre: Option<&'a str>,
+        band: Option<String>,
+        album: Option<String>,
+        track: Option<String>,
+        genre: Option<String>,
     },
 }
 
@@ -188,9 +186,9 @@ impl MusicIndexer {
     }
 
     /// The entry point for all core search strategies
-    pub fn search(&self, intent: SearchIntent<'_>) -> PlaybackTarget<'_> {
+    pub fn search(&self, intent: SearchIntent) -> PlaybackTarget<'_> {
         match intent {
-            SearchIntent::Global { query } => self.perform_global_cascade_search(query),
+            SearchIntent::Global(query) => self.perform_global_cascade_search(query),
             SearchIntent::Targeted {
                 band,
                 album,
@@ -201,8 +199,8 @@ impl MusicIndexer {
     }
 
     /// Cascading global search: Bands -> Albums -> Tracks
-    fn perform_global_cascade_search(&self, query: &str) -> PlaybackTarget<'_> {
-        let cleaned = prepare_name(query);
+    fn perform_global_cascade_search(&self, query: String) -> PlaybackTarget<'_> {
+        let cleaned = prepare_name(&query);
 
         // =========================
         // TIER 1: BANDS
@@ -314,15 +312,15 @@ impl MusicIndexer {
     /// Search with intersection of specific structural filters
     fn perform_combined_search(
         &self,
-        band_opt: Option<&str>,
-        album_opt: Option<&str>,
-        track_opt: Option<&str>,
-        genre_opt: Option<&str>,
+        band_opt: Option<String>,
+        album_opt: Option<String>,
+        track_opt: Option<String>,
+        genre_opt: Option<String>,
     ) -> PlaybackTarget<'_> {
-        let band_filter = band_opt.map(prepare_name);
-        let album_filter = album_opt.map(prepare_name);
-        let track_filter = track_opt.map(prepare_name);
-        let genre_filter = genre_opt.map(prepare_name);
+        let band_filter = band_opt.map(|s| prepare_name(&s));
+        let album_filter = album_opt.map(|s| prepare_name(&s));
+        let track_filter = track_opt.map(|s| prepare_name(&s));
+        let genre_filter = genre_opt.map(|s| prepare_name(&s));
 
         let has_band = band_filter.is_some();
         let has_album = album_filter.is_some();

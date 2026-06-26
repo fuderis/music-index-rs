@@ -51,14 +51,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let start_time = Instant::now();
 
     let music_index = MusicIndexer::scan_dir(path!("~/Music"), path!("~/music.cache")).await?;
-    let intent = if let Some(ref query) = args.search {
-        SearchIntent::Global { query }
+    let intent = if let Some(query) = args.search {
+        SearchIntent::Global(query)
     } else {
         SearchIntent::Targeted {
-            band: args.band.as_deref(),
-            album: args.album.as_deref(),
-            track: args.track.as_deref(),
-            genre: args.genre.as_deref(),
+            band: args.band,
+            album: args.album,
+            track: args.track,
+            genre: args.genre,
         }
     };
 
