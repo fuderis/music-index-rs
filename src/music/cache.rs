@@ -181,7 +181,7 @@ impl MusicCache {
             } else {
                 self.bands.push(Band {
                     dir: band_dir,
-                    name: artist_name,
+                    name: artist_name.clone(),
                     text: artist_key,
                     genres: vec![],
                     albums: vec![],
@@ -233,6 +233,7 @@ impl MusicCache {
 
             album_entry.tracks.push(Track {
                 name: track_name,
+                band: artist_name,
                 text: track_key,
                 path,
             });

@@ -133,7 +133,8 @@ impl MusicIndexer {
         for band in &self.cache.bands {
             for album in &band.albums {
                 for track in &album.tracks {
-                    let combined_text = format!("{} {} {}", band.text, album.text, track.text);
+                    let combined_text =
+                        format!("{} {} {} {}", band.text, track.band, album.text, track.text);
                     if words.iter().all(|word| combined_text.contains(word)) {
                         results.push(track);
                     }
@@ -169,7 +170,9 @@ impl MusicIndexer {
 
     /// Searches based by one specific song name
     pub fn find_track(&self, band_name: &str, album_name: Option<&str>) -> Vec<&Track> {
-        let band = match self.find_band(band_name) {
+        let target_band = prepare_name(band_name);
+
+        let band = match self.cache.bands.iter().find(|b| b.text == target_band) {
             Some(b) => b,
             None => return vec![],
         };
@@ -179,10 +182,19 @@ impl MusicIndexer {
             band.albums
                 .iter()
                 .find(|a| a.text == alb_target)
-                .map(|a| a.tracks.iter().collect())
+                .map(|a| {
+                    a.tracks
+                        .iter()
+                        .filter(|t| prepare_name(&t.band) == target_band)
+                        .collect()
+                })
                 .unwrap_or_default()
         } else {
-            band.albums.iter().flat_map(|a| a.tracks.iter()).collect()
+            band.albums
+                .iter()
+                .flat_map(|a| a.tracks.iter())
+                .filter(|t| prepare_name(&t.band) == target_band)
+                .collect()
         }
     }
 
@@ -440,7 +452,7 @@ impl MusicIndexer {
                 }
             }
 
-            let band_score = if let Some(ref b_ref) = band_filter {
+            let struct_band_score = if let Some(ref b_ref) = band_filter {
                 let score = fuzzy_cmp::hybrid_compare(&band.text, b_ref);
                 if score < CMP_COEF {
                     continue;
@@ -462,6 +474,18 @@ impl MusicIndexer {
                 };
 
                 for track in &album.tracks {
+                    let track_band_score = if let Some(ref b_ref) = band_filter {
+                        let score = fuzzy_cmp::hybrid_compare(&prepare_name(&track.band), b_ref);
+                        if score < CMP_COEF {
+                            continue;
+                        }
+                        score
+                    } else {
+                        1.0
+                    };
+
+                    let band_score = struct_band_score.max(track_band_score);
+
                     let track_score = if let Some(ref t_ref) = track_filter {
                         let score = fuzzy_cmp::hybrid_compare(&track.text, t_ref);
                         if score < CMP_COEF {
